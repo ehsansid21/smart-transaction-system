@@ -1,4 +1,4 @@
-# Smart Transaction & Fraud Detection System 🚀
+# Smart Transaction & Fraud Detection System 
 
 ## 📌 Project Overview
 A backend system that simulates a banking system with smart fraud detection.
@@ -30,11 +30,6 @@ Users can:
 
 ---
 
-## 🚀 Current Status
-✅ Day 1 Completed  
-- Spring Boot setup  
-- First API running  
 
----
-
-## 📂 Project Structure
+## 💼 Author
+Ehsan Siddiqui
