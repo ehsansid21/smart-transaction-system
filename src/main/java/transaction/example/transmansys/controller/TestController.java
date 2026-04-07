@@ -8,6 +8,6 @@ public class TestController {
 
     @GetMapping("/api/test")
     public String test() {
-        return "Smart Transaction System Started 🚀";
+        return "Smart Transaction System Started ";
     }
 }
