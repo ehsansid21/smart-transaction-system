@@ -1,8 +1,11 @@
 package transaction.example.transmansys.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
+
 public class User {
 
     @Id
