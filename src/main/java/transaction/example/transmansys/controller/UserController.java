@@ -9,44 +9,44 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    // CREATE
+
     @PostMapping
     public User createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
 
-    // READ ALL
+
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // READ BY ID
+
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public User getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
-    // UPDATE
+
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 
-    // DELETE
+
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "User deleted successfully";
     }
 
-    // 🔥 TRANSFER MONEY
+    // 🔥 MONEY TRANSFER API
     @PostMapping("/transfer")
     public String transferMoney(
             @RequestParam Long senderId,
@@ -54,6 +54,6 @@ public class UserController {
             @RequestParam BigDecimal amount) {
 
         userService.transferMoney(senderId, receiverId, amount);
-        return "Transfer successful";
+        return "Transaction successful";
     }
 }
