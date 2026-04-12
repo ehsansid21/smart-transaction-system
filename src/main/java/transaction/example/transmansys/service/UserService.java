@@ -1,15 +1,16 @@
 package transaction.example.transmansys.service;
 
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import transaction.example.transmansys.dto.UserRequestDTO;
+import transaction.example.transmansys.dto.UserResponseDTO;
 import transaction.example.transmansys.entity.User;
-import transaction.example.transmansys.exception.InsufficientBalanceException;
-import transaction.example.transmansys.exception.UserAlreadyExistsException;
 import transaction.example.transmansys.repository.UserRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -17,76 +18,85 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User createUser(User user) {
+    // CREATE
+    public UserResponseDTO createUser(UserRequestDTO dto) {
 
-        // Check duplicate email
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("Email already registered!");
-        }
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setBalance(dto.getBalance());
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        return mapToResponse(saved);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    // READ ALL
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    // READ BY ID
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return mapToResponse(user);
     }
 
-    public User updateUser(Long id, User updatedUser) {
+    // UPDATE ✅ (FIXED)
+    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
 
-        User user = getUserById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check email uniqueness (only if changed)
-        if (!user.getEmail().equals(updatedUser.getEmail()) &&
-                userRepository.findByEmail(updatedUser.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("Email already in use!");
-        }
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setBalance(dto.getBalance());
 
-        user.setName(updatedUser.getName());
-        user.setEmail(updatedUser.getEmail());
-        user.setPassword(updatedUser.getPassword());
+        User updated = userRepository.save(user);
 
-        return userRepository.save(user);
+        return mapToResponse(updated);
     }
 
+    // DELETE
     public void deleteUser(Long id) {
-
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
-        }
-
         userRepository.deleteById(id);
     }
 
+    // TRANSFER 💸
     @Transactional
     public void transferMoney(Long senderId, Long receiverId, BigDecimal amount) {
 
-        // Validation
-        if (senderId.equals(receiverId)) {
-            throw new IllegalArgumentException("Sender and receiver cannot be same");
-        }
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero");
-        }
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
-        User sender = getUserById(senderId);
-        User receiver = getUserById(receiverId);
-
-        // Balance check
         if (sender.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientBalanceException("Insufficient balance");
+            throw new RuntimeException("Insufficient balance");
         }
 
-        // Transfer logic
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
 
         userRepository.save(sender);
         userRepository.save(receiver);
+    }
+
+    // MAPPER
+    private UserResponseDTO mapToResponse(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setBalance(user.getBalance());
+        return dto;
     }
 }

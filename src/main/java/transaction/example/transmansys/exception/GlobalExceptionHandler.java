@@ -18,7 +18,6 @@ public class GlobalExceptionHandler {
         return error;
     }
 
-
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleUserNotFound(UserNotFoundException ex) {
@@ -27,7 +26,6 @@ public class GlobalExceptionHandler {
         return error;
     }
 
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleDatabaseError(DataIntegrityViolationException ex) {
@@ -35,6 +33,7 @@ public class GlobalExceptionHandler {
         error.put("error", "Duplicate email or invalid data");
         return error;
     }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleGenericError(Exception ex) {
