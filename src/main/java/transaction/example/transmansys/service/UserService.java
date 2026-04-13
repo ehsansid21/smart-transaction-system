@@ -18,7 +18,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // CREATE
+
+
+    // ✅ CREATE
     public UserResponseDTO createUser(UserRequestDTO dto) {
 
         User user = new User();
@@ -32,7 +34,7 @@ public class UserService {
         return mapToResponse(saved);
     }
 
-    // READ ALL
+    // ✅ GET ALL
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -40,19 +42,22 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // READ BY ID
-    public UserResponseDTO getUserById(Long id) {
-        User user = userRepository.findById(id)
+    // ✅ GET BY ID (ENTITY)
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
+    // ✅ GET BY ID (DTO) ⭐ FIX
+    public UserResponseDTO getUserResponseById(Long id) {
+        User user = getUserById(id);
         return mapToResponse(user);
     }
 
-    // UPDATE ✅ (FIXED)
+    // ✅ UPDATE USER ⭐ FIX
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = getUserById(id);
 
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
@@ -64,20 +69,21 @@ public class UserService {
         return mapToResponse(updated);
     }
 
-    // DELETE
+    // ✅ DELETE
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
-    // TRANSFER 💸
+    // ✅ TRANSFER
     @Transactional
     public void transferMoney(Long senderId, Long receiverId, BigDecimal amount) {
 
-        User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        User sender = getUserById(senderId);
+        User receiver = getUserById(receiverId);
 
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        if (sender.getBalance() == null) {
+            throw new RuntimeException("Sender balance is null");
+        }
 
         if (sender.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient balance");
@@ -90,7 +96,7 @@ public class UserService {
         userRepository.save(receiver);
     }
 
-    // MAPPER
+    // ✅ MAPPER
     private UserResponseDTO mapToResponse(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());

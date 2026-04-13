@@ -1,5 +1,6 @@
 package transaction.example.transmansys.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import transaction.example.transmansys.dto.UserRequestDTO;
@@ -10,45 +11,45 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    // CREATE
+    // ✅ CREATE USER
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO dto) {
+    public UserResponseDTO createUser(@RequestBody @Valid UserRequestDTO dto) {
         return userService.createUser(dto);
     }
 
-    // READ ALL
+    // ✅ GET ALL USERS
     @GetMapping
     public List<UserResponseDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // READ BY ID
+    // ✅ GET USER BY ID
     @GetMapping("/{id}")
     public UserResponseDTO getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+        return userService.getUserResponseById(id);
     }
 
-    // UPDATE ✅
+    // ✅ UPDATE USER
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(@PathVariable Long id,
-                                      @RequestBody UserRequestDTO dto) {
+                                      @RequestBody @Valid UserRequestDTO dto) {
         return userService.updateUser(id, dto);
     }
 
-    // DELETE
+    // ✅ DELETE USER
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "User deleted successfully";
     }
 
-    // TRANSFER 💸
+    // ✅ TRANSFER MONEY
     @PostMapping("/transfer")
     public String transferMoney(@RequestParam Long senderId,
                                 @RequestParam Long receiverId,
