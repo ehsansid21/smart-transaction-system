@@ -7,7 +7,6 @@ import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.dto.UserResponseDTO;
 import transaction.example.transmansys.service.UserService;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -37,8 +36,10 @@ public class UserController {
 
     // ✅ UPDATE USER
     @PutMapping("/{id}")
-    public UserResponseDTO updateUser(@PathVariable Long id,
-                                      @RequestBody @Valid UserRequestDTO dto) {
+    public UserResponseDTO updateUser(
+            @PathVariable Long id,
+            @RequestBody @Valid UserRequestDTO dto) {
+
         return userService.updateUser(id, dto);
     }
 
@@ -47,15 +48,5 @@ public class UserController {
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "User deleted successfully";
-    }
-
-    // ✅ TRANSFER MONEY
-    @PostMapping("/transfer")
-    public String transferMoney(@RequestParam Long senderId,
-                                @RequestParam Long receiverId,
-                                @RequestParam BigDecimal amount) {
-
-        userService.transferMoney(senderId, receiverId, amount);
-        return "Transaction successful";
     }
 }

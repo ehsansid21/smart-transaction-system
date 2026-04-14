@@ -1,26 +1,37 @@
 package transaction.example.transmansys.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import transaction.example.transmansys.dto.TransactionResponseDTO;
+import transaction.example.transmansys.entity.Transaction;
 import transaction.example.transmansys.service.TransactionService;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/transaction")
 public class TransactionController {
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
-    @GetMapping
-    public List<TransactionResponseDTO> getAll() {
-        return transactionService.getAll(); // ✅ correct
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 
-    @GetMapping("/{id}")
-    public TransactionResponseDTO getById(@PathVariable Long id) {
-        return transactionService.getById(id); // ✅ correct
+    @PostMapping("/transfer")
+    public Transaction transfer(
+            @RequestParam Long senderId,
+            @RequestParam Long receiverId,
+            @RequestParam Double amount
+    ) {
+        return transactionService.transferMoney(senderId, receiverId, amount);
+    }
+
+    @GetMapping
+    public List<Transaction> getAll() {
+        return transactionService.getAll();
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Transaction> getUserTransactions(@PathVariable Long userId) {
+        return transactionService.getUserTransactions(userId);
     }
 }

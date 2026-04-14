@@ -1,12 +1,11 @@
 package transaction.example.transmansys.service;
 
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import transaction.example.transmansys.dto.UserRequestDTO;
-import transaction.example.transmansys.dto.UserResponseDTO;
 import transaction.example.transmansys.entity.User;
 import transaction.example.transmansys.repository.UserRepository;
+import transaction.example.transmansys.dto.UserRequestDTO;
+import transaction.example.transmansys.dto.UserResponseDTO;
+
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,94 +14,79 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-
-    // ✅ CREATE
+    // ✅ CREATE USER
     public UserResponseDTO createUser(UserRequestDTO dto) {
 
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
-        user.setBalance(dto.getBalance());
 
-        User saved = userRepository.save(user);
+        if (dto.getBalance() != null) {
+            user.setBalance(BigDecimal.valueOf(dto.getBalance()));
+        } else {
+            user.setBalance(BigDecimal.ZERO);
+        }
 
-        return mapToResponse(saved);
+        User savedUser = userRepository.save(user);
+
+        return mapToDTO(savedUser); // 🔥 FIX
     }
 
-    // ✅ GET ALL
+    // ✅ GET ALL USERS
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(this::mapToDTO) // 🔥 FIX
                 .collect(Collectors.toList());
     }
 
-    // ✅ GET BY ID (ENTITY)
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    // ✅ GET BY ID (DTO) ⭐ FIX
+    // ✅ GET USER BY ID
     public UserResponseDTO getUserResponseById(Long id) {
-        User user = getUserById(id);
-        return mapToResponse(user);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return mapToDTO(user); // 🔥 FIX
     }
 
-    // ✅ UPDATE USER ⭐ FIX
+    // ✅ UPDATE USER
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
 
-        User user = getUserById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
-        user.setBalance(dto.getBalance());
 
-        User updated = userRepository.save(user);
+        if (dto.getBalance() != null) {
+            user.setBalance(BigDecimal.valueOf(dto.getBalance()));
+        }
 
-        return mapToResponse(updated);
+        User updatedUser = userRepository.save(user);
+
+        return mapToDTO(updatedUser); // 🔥 FIX
     }
 
-    // ✅ DELETE
+    // ✅ DELETE USER
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
-    // ✅ TRANSFER
-    @Transactional
-    public void transferMoney(Long senderId, Long receiverId, BigDecimal amount) {
+    // 🔥 CORE MAPPING METHOD
+    private UserResponseDTO mapToDTO(User user) {
 
-        User sender = getUserById(senderId);
-        User receiver = getUserById(receiverId);
-
-        if (sender.getBalance() == null) {
-            throw new RuntimeException("Sender balance is null");
-        }
-
-        if (sender.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        sender.setBalance(sender.getBalance().subtract(amount));
-        receiver.setBalance(receiver.getBalance().add(amount));
-
-        userRepository.save(sender);
-        userRepository.save(receiver);
-    }
-
-    // ✅ MAPPER
-    private UserResponseDTO mapToResponse(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setBalance(user.getBalance());
+
         return dto;
     }
 }

@@ -1,53 +1,52 @@
 package transaction.example.transmansys.service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.entity.User;
 import transaction.example.transmansys.repository.UserRepository;
 import transaction.example.transmansys.security.JwtService;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public String register(UserRequestDTO dto) {
+    // ✅ REGISTER
+    public String register(User user) {
 
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            return "User already exists";
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("User already exists");
         }
 
-        User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setBalance(dto.getBalance());
+        // 🔥 IMPORTANT FIX
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
-
         return "User registered successfully";
     }
 
-    public String login(UserRequestDTO dto) {
+    // ✅ LOGIN
+    public String login(String email, String password) {
 
-        User user = userRepository.findByEmail(dto.getEmail())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        // 🔥 IMPORTANT FIX
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
 
-        return jwtService.generateToken(user.getEmail());
+        return jwtService.generateToken(email);
     }
 }
