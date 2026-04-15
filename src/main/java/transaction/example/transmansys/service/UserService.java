@@ -1,8 +1,7 @@
 package transaction.example.transmansys.service;
-
+import transaction.example.transmansys.dto.RegisterRequestDTO;
 import transaction.example.transmansys.entity.User;
 import transaction.example.transmansys.repository.UserRepository;
-import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.dto.UserResponseDTO;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class UserService {
     }
 
     // ✅ CREATE USER
-    public UserResponseDTO createUser(UserRequestDTO dto) {
+    public UserResponseDTO createUser(RegisterRequestDTO dto) {
 
         User user = new User();
         user.setName(dto.getName());
@@ -56,7 +55,7 @@ public class UserService {
     }
 
     // ✅ UPDATE USER
-    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
+    public UserResponseDTO updateUser(Long id, RegisterRequestDTO dto) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));

@@ -1,9 +1,9 @@
 package transaction.example.transmansys.controller;
 
+import transaction.example.transmansys.dto.RegisterRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.dto.UserResponseDTO;
 import transaction.example.transmansys.service.UserService;
 
@@ -18,7 +18,7 @@ public class UserController {
 
     // ✅ CREATE USER
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody @Valid UserRequestDTO dto) {
+    public UserResponseDTO createUser(@RequestBody @Valid RegisterRequestDTO dto) {
         return userService.createUser(dto);
     }
 
@@ -38,7 +38,7 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(
             @PathVariable Long id,
-            @RequestBody @Valid UserRequestDTO dto) {
+            @RequestBody @Valid RegisterRequestDTO dto) {
 
         return userService.updateUser(id, dto);
     }

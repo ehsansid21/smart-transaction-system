@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findBySenderId(Long senderId);
-
-    List<Transaction> findByReceiverId(Long receiverId);
+    // ✅ FETCH USER HISTORY
+    List<Transaction> findBySenderIdOrReceiverId(Long senderId, Long receiverId);
 }

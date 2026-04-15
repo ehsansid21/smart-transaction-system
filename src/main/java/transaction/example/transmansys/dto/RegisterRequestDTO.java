@@ -2,23 +2,23 @@ package transaction.example.transmansys.dto;
 
 import jakarta.validation.constraints.*;
 
-public class UserRequestDTO {
+public class RegisterRequestDTO {
 
     @NotBlank(message = "Name is required")
     private String name;
 
     @Email(message = "Invalid email")
+    @NotBlank(message = "Email is required")
     private String email;
 
     @Size(min = 4, message = "Password must be at least 4 characters")
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotNull(message = "Balance required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Balance must be >= 0")
     private Double balance;
 
-    // Getters and Setters
-
+    // Getters & Setters
     public String getName() {
         return name;
     }

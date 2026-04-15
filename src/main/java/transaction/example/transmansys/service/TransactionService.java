@@ -4,10 +4,11 @@ import transaction.example.transmansys.entity.Transaction;
 import transaction.example.transmansys.entity.User;
 import transaction.example.transmansys.repository.TransactionRepository;
 import transaction.example.transmansys.repository.UserRepository;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,10 +23,16 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
+    // 🔥 VERY IMPORTANT
+    @Transactional
     public Transaction transferMoney(Long senderId, Long receiverId, Double amount) {
 
         if (amount <= 0) {
             throw new RuntimeException("Amount must be greater than 0");
+        }
+
+        if (senderId.equals(receiverId)) {
+            throw new RuntimeException("Sender and receiver cannot be same");
         }
 
         User sender = userRepository.findById(senderId)
@@ -48,31 +55,30 @@ public class TransactionService {
             throw new RuntimeException("Insufficient balance");
         }
 
+        // 💸 TRANSFER
         sender.setBalance(sender.getBalance().subtract(transferAmount));
         receiver.setBalance(receiver.getBalance().add(transferAmount));
 
         userRepository.save(sender);
         userRepository.save(receiver);
 
+        // 🧾 SAVE TRANSACTION
         Transaction transaction = new Transaction();
         transaction.setAmount(transferAmount);
         transaction.setSenderId(senderId);
         transaction.setReceiverId(receiverId);
-        transaction.setCreatedAt(LocalDateTime.now());
 
+        // ❗ REMOVE createdAt (handled by @PrePersist if you added it)
         return transactionRepository.save(transaction);
     }
 
+    // ✅ GET ALL
     public List<Transaction> getAll() {
         return transactionRepository.findAll();
     }
 
+    // ✅ USER HISTORY (CLEAN VERSION)
     public List<Transaction> getUserTransactions(Long userId) {
-
-        List<Transaction> sent = transactionRepository.findBySenderId(userId);
-        List<Transaction> received = transactionRepository.findByReceiverId(userId);
-
-        sent.addAll(received);
-        return sent;
+        return transactionRepository.findBySenderIdOrReceiverId(userId, userId);
     }
 }

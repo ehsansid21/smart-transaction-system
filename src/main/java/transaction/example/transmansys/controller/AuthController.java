@@ -1,11 +1,11 @@
 package transaction.example.transmansys.controller;
 
+import transaction.example.transmansys.dto.LoginRequestDTO;
+import transaction.example.transmansys.dto.RegisterRequestDTO;
 import transaction.example.transmansys.entity.User;
-import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.service.AuthService;
 
 import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -22,18 +22,17 @@ public class AuthController {
 
     // ✅ REGISTER
     @PostMapping("/register")
-    public String register(@Valid @RequestBody UserRequestDTO dto) {
+    public String register(@Valid @RequestBody RegisterRequestDTO dto) {
 
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
-        // ✅ Use DTO balance OR default
         if (dto.getBalance() != null) {
             user.setBalance(BigDecimal.valueOf(dto.getBalance()));
         } else {
-            user.setBalance(BigDecimal.valueOf(1000)); // fallback
+            user.setBalance(BigDecimal.valueOf(1000));
         }
 
         user.setRole("USER");
@@ -43,7 +42,7 @@ public class AuthController {
 
     // ✅ LOGIN
     @PostMapping("/login")
-    public String login(@RequestBody UserRequestDTO dto) {
+    public String login(@Valid @RequestBody LoginRequestDTO dto) {
         return authService.login(dto.getEmail(), dto.getPassword());
     }
 }
