@@ -19,8 +19,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t " +
            "WHERE (t.senderId = :userId OR t.receiverId = :userId) " +
-           "AND (cast(:startDate as timestamp) IS NULL OR t.createdAt >= :startDate) " +
-           "AND (cast(:endDate as timestamp) IS NULL OR t.createdAt <= :endDate) " +
+           "AND (cast(:startDate as timestamp) IS NULL OR t.timestamp >= :startDate) " +
+           "AND (cast(:endDate as timestamp) IS NULL OR t.timestamp <= :endDate) " +
            "AND (:search IS NULL OR :search = '' OR " +
            "  t.senderId IN (SELECT u.id FROM User u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) OR " +
            "  t.receiverId IN (SELECT u.id FROM User u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) " +
