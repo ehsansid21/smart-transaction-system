@@ -5,7 +5,6 @@ import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.service.AuthService;
 
 import jakarta.validation.Valid;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -29,14 +28,19 @@ public class AuthController {
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
-        // ✅ Use DTO balance OR default
+        // ✅ FIX: direct assignment (NO conversion)
         if (dto.getBalance() != null) {
-            user.setBalance(BigDecimal.valueOf(dto.getBalance()));
+            user.setBalance(dto.getBalance());
         } else {
-            user.setBalance(BigDecimal.valueOf(1000)); // fallback
+            user.setBalance(BigDecimal.ZERO);
         }
 
-        user.setRole("USER");
+        // Allow creating ADMIN from API
+        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
+            user.setRole(dto.getRole().toUpperCase());
+        } else {
+            user.setRole("USER");
+        }
 
         return authService.register(user);
     }

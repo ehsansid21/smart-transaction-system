@@ -42,11 +42,15 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!user.isActive()) {
+            throw new RuntimeException("Account deactivated. Please contact support.");
+        }
+
         // 🔥 IMPORTANT FIX
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
 
-        return jwtService.generateToken(email);
+       return jwtService.generateToken(user.getEmail(), user.getRole());
     }
 }
