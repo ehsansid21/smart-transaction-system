@@ -149,7 +149,7 @@ public class TransactionService {
 
     // 📜 GET ALL TRANSACTIONS (Admin)
     public PaginatedResponseDTO<TransactionResponseDTO> getAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         Page<Transaction> paged = transactionRepository.findAll(pageable);
         List<TransactionResponseDTO> dtos = paged.getContent().stream().map(t -> {
             User s = t.getSenderId() != null ? userRepository.findById(t.getSenderId()).orElse(null) : null;
@@ -175,7 +175,7 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Long userId = user.getId();
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         
         Page<Transaction> paged = transactionRepository.findFilteredTransactions(userId, startDate, endDate, search, pageable);
 
@@ -206,7 +206,7 @@ public class TransactionService {
         }
 
         for (Transaction t : received) {
-            User sender = userRepository.findById(t.getSenderId()).orElse(null);
+            User sender = t.getSenderId() != null ? userRepository.findById(t.getSenderId()).orElse(null) : null;
             result.add(mapToDTO(t, sender, user, "CREDIT"));
         }
 
