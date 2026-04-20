@@ -1,8 +1,7 @@
 package transaction.example.transmansys.controller;
 
-import transaction.example.transmansys.dto.LoginRequestDTO;
-import transaction.example.transmansys.dto.RegisterRequestDTO;
 import transaction.example.transmansys.entity.User;
+import transaction.example.transmansys.dto.UserRequestDTO;
 import transaction.example.transmansys.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -22,27 +21,33 @@ public class AuthController {
 
     // ✅ REGISTER
     @PostMapping("/register")
-    public String register(@Valid @RequestBody RegisterRequestDTO dto) {
+    public String register(@Valid @RequestBody UserRequestDTO dto) {
 
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
+        // ✅ FIX: direct assignment (NO conversion)
         if (dto.getBalance() != null) {
-            user.setBalance(BigDecimal.valueOf(dto.getBalance()));
+            user.setBalance(dto.getBalance());
         } else {
-            user.setBalance(BigDecimal.valueOf(1000));
+            user.setBalance(BigDecimal.ZERO);
         }
 
-        user.setRole("USER");
+        // Allow creating ADMIN from API
+        if (dto.getRole() != null && !dto.getRole().isEmpty()) {
+            user.setRole(dto.getRole().toUpperCase());
+        } else {
+            user.setRole("USER");
+        }
 
         return authService.register(user);
     }
 
     // ✅ LOGIN
     @PostMapping("/login")
-    public String login(@Valid @RequestBody LoginRequestDTO dto) {
+    public String login(@RequestBody UserRequestDTO dto) {
         return authService.login(dto.getEmail(), dto.getPassword());
     }
 }

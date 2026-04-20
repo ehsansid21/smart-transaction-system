@@ -20,6 +20,9 @@ public class User {
 
     private String role;
 
+    @Column(nullable = false)
+    private boolean isActive = true;
+
     // ===== Constructors =====
     public User() {}
 
@@ -56,6 +59,10 @@ public class User {
         return role;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
     // ===== Setters =====
     public void setId(Long id) {
         this.id = id;
@@ -79,5 +86,9 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

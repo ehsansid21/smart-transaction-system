@@ -2,6 +2,8 @@ package transaction.example.transmansys.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,53 +15,67 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ✅ User already exists
+    // ✅ USER ALREADY EXISTS
     @ExceptionHandler(UserAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleUserExists(UserAlreadyExistsException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return error;
+    public ResponseEntity<?> handleUserExists(UserAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // ✅ User not found
+    // ✅ USER NOT FOUND
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleUserNotFound(UserNotFoundException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return error;
+    public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // ✅ Validation errors (IMPORTANT 🔥)
+    // ✅ BAD REQUEST
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    // ✅ ACCESS DENIED
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    // ✅ RUNTIME EXCEPTIONS (transfer errors, user not found, insufficient balance etc.)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    // ✅ VALIDATION ERRORS
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationErrors(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-
-        return errors;
+        // Also put first error as "error" key for frontend compatibility
+        ex.getBindingResult().getFieldErrors().stream().findFirst().ifPresent(e ->
+                errors.put("error", e.getDefaultMessage())
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    // ✅ Database errors (duplicate email etc.)
+    // ✅ DATABASE ERRORS
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleDatabaseError(DataIntegrityViolationException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Duplicate email or invalid data");
-        return error;
+    public ResponseEntity<?> handleDatabaseError(DataIntegrityViolationException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Email already in use");
     }
 
-    // ✅ Generic fallback
+    // ❌ GENERIC FALLBACK
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleGenericError(Exception ex) {
+    public ResponseEntity<?> handleGenericError(Exception ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                "Something went wrong: " + ex.getMessage());
+    }
+
+    // 🔥 COMMON RESPONSE BUILDER — always returns { "error": "message" }
+    private ResponseEntity<?> buildResponse(HttpStatus status, String message) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return error;
+        error.put("error", message);
+        return ResponseEntity.status(status).body(error);
     }
 }

@@ -1,8 +1,9 @@
 package transaction.example.transmansys.dto;
 
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
-public class RegisterRequestDTO {
+public class UserRequestDTO {
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -12,13 +13,16 @@ public class RegisterRequestDTO {
     private String email;
 
     @Size(min = 4, message = "Password must be at least 4 characters")
-    @NotBlank(message = "Password is required")
     private String password;
 
+    // Optional — defaults to 1000 if not provided
     @DecimalMin(value = "0.0", inclusive = true, message = "Balance must be >= 0")
-    private Double balance;
+    private BigDecimal balance;
 
-    // Getters & Setters
+    private String role;
+
+    // Getters and Setters
+
     public String getName() {
         return name;
     }
@@ -43,11 +47,19 @@ public class RegisterRequestDTO {
         this.password = password;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
