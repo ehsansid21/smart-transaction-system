@@ -80,7 +80,7 @@ public class TransactionService {
         transaction.setAmount(transferAmount);
         transaction.setSenderId(sender.getId());
         transaction.setReceiverId(receiver.getId());
-        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setTimestamp();
 
         Transaction saved = transactionRepository.save(transaction);
         
@@ -110,7 +110,7 @@ public class TransactionService {
         transaction.setAmount(depositAmount);
         transaction.setSenderId(null); // System deposit
         transaction.setReceiverId(user.getId());
-        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setTimestamp();
 
         Transaction saved = transactionRepository.save(transaction);
         return mapToDTO(saved, null, user, "CREDIT");
@@ -143,7 +143,7 @@ public class TransactionService {
         transaction.setAmount(transferAmount);
         transaction.setSenderId(senderId);
         transaction.setReceiverId(receiverId);
-        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setTimestamp();
         return transactionRepository.save(transaction);
     }
 
@@ -227,7 +227,7 @@ public class TransactionService {
         dto.setReceiverName(receiver != null ? receiver.getName() : "Unknown");
         dto.setSenderEmail(sender != null ? sender.getEmail() : "system@bank.com");
         dto.setReceiverEmail(receiver != null ? receiver.getEmail() : "");
-        dto.setTimestamp(t.getCreatedAt() != null ? t.getCreatedAt().toString() : null);
+        dto.setTimestamp(t.getTimestamp() != null ? t.getTimestamp().toString() : null);
         dto.setType(type);
         return dto;
     }
