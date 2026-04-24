@@ -1,8 +1,6 @@
-# 💰 TransactX - Smart Transaction Management System
+# 💰 TransactX Backend - Smart Transaction Management API
 
-A **secure, full-stack, enterprise-grade financial transaction platform** built using **Spring Boot** and **Angular**. It allows users to register, authenticate, and perform multi-currency money transactions while providing a robust Admin portal for user management and advanced transaction tracking.
-
-This project demonstrates real-world backend and frontend concepts like **JWT stateless authentication, Role-Based Access Control (RBAC), multi-currency handling via third-party APIs, high-performance database filtering, and robust REST API design.**
+A **secure, enterprise-grade financial API** built using **Spring Boot 3** and **Java 21**. This backend powers the [TransactX Frontend](https://github.com/ehsansid21/transman-frontend) and provides a robust foundation for digital wallet services.
 
 ---
 
@@ -11,38 +9,28 @@ This project demonstrates real-world backend and frontend concepts like **JWT st
 *   🔐 **Secure User Authentication & RBAC (JWT)**
     *   Stateless authentication using JSON Web Tokens.
     *   Role-Based Access Control distinguishing `USER` and `ADMIN` privileges.
-    *   Secure endpoints protected by `@PreAuthorize` and `SecurityConfig`.
 *   💸 **Multi-Currency Money Transfer System**
-    *   Real-time exchange rate fetching via external API (`open.er-api.com`).
-    *   Dynamic currency conversion natively handled on the backend to prevent tampering.
+    *   Real-time exchange rate integration.
     *   Atomic database transactions using `@Transactional` to ensure financial integrity.
 *   📊 **High-Performance Transaction Management**
-    *   Store and retrieve detailed transaction records.
-    *   **Server-Side Filtering:** Advanced JPQL `@Query` implementations for full-text search (name/email) and Date-Range filtering natively in MySQL.
+    *   Advanced JPQL `@Query` implementations for full-text search and Date-Range filtering.
 *   🛡️ **Admin Portal & User Management**
-    *   Get all users, view balances, and manage access.
-    *   **Safe Deactivation (Soft Delete):** Users are deactivated via an `isActive` flag instead of a hard SQL `DELETE`, preserving financial history and foreign-key integrity.
-*   ⚠️ **Robust Exception Handling**
-    *   Global Exception Handler using `@RestControllerAdvice` to format errors cleanly (e.g., 403 Forbidden, Validation Errors, Insufficient Balance).
+    *   **Safe Deactivation (Soft Delete):** Users are deactivated via an `isActive` flag, preserving financial history.
+*   🐋 **Fully Dockerized**
+    *   Multi-stage Docker builds for optimized runtime images.
+    *   Containerized database management.
 
 ---
 
 ## 🛠 Tech Stack
 
-### Backend
-*   **Java 17 / Spring Boot 3.x**
+*   **Java 21 / Spring Boot 3.x**
 *   **Spring Security + JWT**
-*   **MySQL** (with `org.hibernate.dialect.MySQL8Dialect`)
+*   **MySQL 8.0**
 *   **JPA / Hibernate**
 *   **Maven**
+*   **Docker**
 *   **Swagger (OpenAPI)**
-*   **RestTemplate** (Third-party API Integration)
-
-### Frontend
-*   **Angular 17+** (Standalone Components)
-*   **TypeScript / RxJS**
-*   **Bootstrap 5 / Custom CSS Glassmorphism**
-*   **HTTP Interceptors** for token management
 
 ---
 
@@ -105,25 +93,27 @@ src/main/java/transaction/example/transmansys
 
 ## ⚙️ Setup Instructions
 
-### 1. Configure MySQL
-Update `application.properties`:
+### 1. The Easy Way (Docker Compose)
+The best way to run this backend is along with its database and frontend using the `docker-compose.yml` located in the [TransactX Frontend](https://github.com/ehsansid21/transman-frontend) repository.
+
+```bash
+docker-compose up --build
+```
+
+### 2. Manual Setup
+If you want to run the backend separately for development:
+
+**Configure MySQL:**
+Update `src/main/resources/application.properties`:
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/transmansys
 spring.datasource.username=root
 spring.datasource.password=yourpassword
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ```
 
-### 2. Run the Backend
+**Run the Backend:**
 ```bash
 mvn spring-boot:run
-```
-
-### 3. Run the Frontend (Angular)
-```bash
-npm install
-ng serve
 ```
 
 ---
